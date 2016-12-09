@@ -1,0 +1,71 @@
+---
+title       : Basic Satistical Model Comparison demo
+subtitle    : Project Application for Coursera Developing Data Products
+author      : Abel Pardo-Lopez
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : [mathjax]            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Introduction
+
+The objective of this application is to show the difficulties of finding a proper statistical model.  
+In this application we have a quadratic function with statistical error, and 3 statistical models (linear, quadratic and cubic) than try to capture the "original" function. The source of the application is in [Github](https://github.com/abelpardolopez/ShinyApp]).  
+
+The application displays a quadratic function wich points have been obtained with a independent variable $X$ from an uniform distribution between 0 and 2, and a dependent varible $Y$ through following formula:  $y= x^{2}+K*x+B+\epsilon$  
+There are 3 slider to show different behavior of the statistical models, when original function changes:  
+-- **Standard deviation slider** increase or reduce the standard deviation of the error($\epsilon$ in previous formula).  
+-- **K Slope slider** changes the linear constant ($K$ in the previous formula), from  -2 to 2.  
+-- **Independent term slider** changes the constant fo the previous formula ($B$), from  -1 to 1.  
+
+Also there are 3 checkboxes to show or not the linear, quadratic and cubic models on the plot.  In following slides are shown application results for the defaults values. The function for default values is: $y = x^{2}+\epsilon$
+
+---  
+## Server Code  
+In following lines are shown server code,  to generate plot and statistical models.  
+```{r libraries,echo=FALSE,cache=FALSE,warning=FALSE,results="hide",messages=FALSE,error=FALSE,warning=FALSE,collapse=TRUE, tidy=TRUE}
+library(ggplot2,quietly=TRUE, warn.conflicts = FALSE,verbose = FALSE)
+library(dplyr,quietly=TRUE, warn.conflicts = FALSE,verbose = FALSE)
+library(broom,quietly=TRUE, warn.conflicts = FALSE,verbose = FALSE)
+library(xtable,quietly=TRUE, warn.conflicts = FALSE,verbose = FALSE)
+```  
+```{r model_code}
+x<-runif(300,min=0,max=2)       # Independent variables
+eps <- rnorm(300,mean=0,sd=0.5) # Standadard Error
+# Function
+y <- x*x+0*x+0+eps # The default values for slope  and for independent term is 0
+Data<-data.frame(y, x,x^2,x^3) # Data frame for ggplot and stats model
+# Plot Code
+p <-ggplot(Data,aes(x=x,y=y))+geom_point(size=3)
+p<-p+geom_smooth(method= "lm",color="red")
+p<-p+geom_smooth(method= "lm",formula = y ~ poly(x, 2),color="blue")
+p<-p+geom_smooth(method= "lm",formula = y ~ poly(x, 3),color="green")
+# Satistical models
+modLin <- lm(y ~ x, Data) # Linear Model
+modQuad <- lm(y ~ x+x.2, Data) # Quadartic Model
+modCubic <- lm(y ~ x+x.2+x.3, Data) # Cubic Model
+resume <- data.frame(rbind(glance(modLin),glance(modQuad),glance(modCubic)))%>%select(r.squared,AIC,BIC);rownames(resume)=c("Linear","Quadratic","Cubic ")
+resumeLin<-tidy(modLin);resumeQuad<-tidy(modQuad);resumeCubic<-tidy(modCubic)
+```  
+
+---  
+## Plot
+Nex plot shows and example of the application plot using default values:  
+```{r, echo=FALSE, fig.align="center", fig.height=5,fig.width=9}
+p
+```  
+
+Next slide shows an example of table results of the application usign slider default values. It is shown the model stats comparison ($R^{2}$, AIC, BIC). Following tables shows the statistical results of the estimated constants from the models.
+
+---  
+##  Statistical Models Results
+```{r tables, results='asis',echo=FALSE}
+print(xtable(resume),type="html") 
+print(xtable(resumeLin),type="html")
+print(xtable(resumeQuad),type="html")
+print(xtable(resumeCubic),type="html")
+```  

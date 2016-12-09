@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Basic Satistical Model Comparison demo</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Basic Satistical Model Comparison demo">
+  <meta name="author" content="Abel Pardo-Lopez">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Basic Satistical Model Comparison demo</h1>
+    <h2>Project Application for Coursera Developing Data Products</h2>
+    <p>Abel Pardo-Lopez<br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Introduction</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>The objective of this application is to show the difficulties of finding a proper statistical model.<br>
+In this application we have a quadratic function with statistical error, and 3 statistical models (linear, quadratic and cubic) than try to capture the &quot;original&quot; function. The source of the application is in <a href="https://github.com/abelpardolopez/ShinyApp%5D">Github</a>.  </p>
+
+<p>The application displays a quadratic function wich points have been obtained with a independent variable \(X\) from an uniform distribution between 0 and 2, and a dependent varible \(Y\) through following formula:  \(y= x^{2}+K*x+B+\epsilon\)<br>
+There are 3 slider to show different behavior of the statistical models, when original function changes:<br>
+-- <strong>Standard deviation slider</strong> increase or reduce the standard deviation of the error(\(\epsilon\) in previous formula).<br>
+-- <strong>K Slope slider</strong> changes the linear constant (\(K\) in the previous formula), from  -2 to 2.<br>
+-- <strong>Independent term slider</strong> changes the constant fo the previous formula (\(B\)), from  -1 to 1.  </p>
+
+<p>Also there are 3 checkboxes to show or not the linear, quadratic and cubic models on the plot.  In following slides are shown application results for the defaults values. The function for default values is: \(y = x^{2}+\epsilon\)</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>Server Code</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>In following lines are shown server code,  to generate plot and statistical models.  </p>
+
+<pre><code class="r">x&lt;-runif(300,min=0,max=2)       # Independent variables
+eps &lt;- rnorm(300,mean=0,sd=0.5) # Standadard Error
+# Function
+y &lt;- x*x+0*x+0+eps # The default values for slope  and for independent term is 0
+Data&lt;-data.frame(y, x,x^2,x^3) # Data frame for ggplot and stats model
+# Plot Code
+p &lt;-ggplot(Data,aes(x=x,y=y))+geom_point(size=3)
+p&lt;-p+geom_smooth(method= &quot;lm&quot;,color=&quot;red&quot;)
+p&lt;-p+geom_smooth(method= &quot;lm&quot;,formula = y ~ poly(x, 2),color=&quot;blue&quot;)
+p&lt;-p+geom_smooth(method= &quot;lm&quot;,formula = y ~ poly(x, 3),color=&quot;green&quot;)
+# Satistical models
+modLin &lt;- lm(y ~ x, Data) # Linear Model
+modQuad &lt;- lm(y ~ x+x.2, Data) # Quadartic Model
+modCubic &lt;- lm(y ~ x+x.2+x.3, Data) # Cubic Model
+resume &lt;- data.frame(rbind(glance(modLin),glance(modQuad),glance(modCubic)))%&gt;%select(r.squared,AIC,BIC);rownames(resume)=c(&quot;Linear&quot;,&quot;Quadratic&quot;,&quot;Cubic &quot;)
+resumeLin&lt;-tidy(modLin);resumeQuad&lt;-tidy(modQuad);resumeCubic&lt;-tidy(modCubic)
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Plot</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Nex plot shows and example of the application plot using default values:<br>
+<img src="assets/fig/unnamed-chunk-1-1.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" style="display: block; margin: auto;" /></p>
+
+<p>Next slide shows an example of table results of the application usign slider default values. It is shown the model stats comparison (\(R^{2}\), AIC, BIC). Following tables shows the statistical results of the estimated constants from the models.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Statistical Models Results</h2>
+  </hgroup>
+  <article data-timings="">
+    <!-- html table generated in R 3.3.1 by xtable 1.8-2 package -->
+
+<!-- Fri Dec 09 08:45:15 2016 -->
+
+<table border=1>
+<tr> <th>  </th> <th> r.squared </th> <th> AIC </th> <th> BIC </th>  </tr>
+  <tr> <td align="right"> Linear </td> <td align="right"> 0.84 </td> <td align="right"> 483.93 </td> <td align="right"> 495.04 </td> </tr>
+  <tr> <td align="right"> Quadratic </td> <td align="right"> 0.88 </td> <td align="right"> 404.17 </td> <td align="right"> 418.99 </td> </tr>
+  <tr> <td align="right"> Cubic  </td> <td align="right"> 0.88 </td> <td align="right"> 405.08 </td> <td align="right"> 423.60 </td> </tr>
+   </table>
+
+<!-- html table generated in R 3.3.1 by xtable 1.8-2 package -->
+
+<!-- Fri Dec 09 08:45:15 2016 -->
+
+<table border=1>
+<tr> <th>  </th> <th> term </th> <th> estimate </th> <th> std.error </th> <th> statistic </th> <th> p.value </th>  </tr>
+  <tr> <td align="right"> 1 </td> <td> (Intercept) </td> <td align="right"> -0.66 </td> <td align="right"> 0.06 </td> <td align="right"> -10.94 </td> <td align="right"> 0.00 </td> </tr>
+  <tr> <td align="right"> 2 </td> <td> x </td> <td align="right"> 2.05 </td> <td align="right"> 0.05 </td> <td align="right"> 39.08 </td> <td align="right"> 0.00 </td> </tr>
+   </table>
+
+<!-- html table generated in R 3.3.1 by xtable 1.8-2 package -->
+
+<!-- Fri Dec 09 08:45:15 2016 -->
+
+<table border=1>
+<tr> <th>  </th> <th> term </th> <th> estimate </th> <th> std.error </th> <th> statistic </th> <th> p.value </th>  </tr>
+  <tr> <td align="right"> 1 </td> <td> (Intercept) </td> <td align="right"> -0.10 </td> <td align="right"> 0.08 </td> <td align="right"> -1.31 </td> <td align="right"> 0.19 </td> </tr>
+  <tr> <td align="right"> 2 </td> <td> x </td> <td align="right"> 0.36 </td> <td align="right"> 0.18 </td> <td align="right"> 1.98 </td> <td align="right"> 0.05 </td> </tr>
+  <tr> <td align="right"> 3 </td> <td> x.2 </td> <td align="right"> 0.84 </td> <td align="right"> 0.09 </td> <td align="right"> 9.65 </td> <td align="right"> 0.00 </td> </tr>
+   </table>
+
+<!-- html table generated in R 3.3.1 by xtable 1.8-2 package -->
+
+<!-- Fri Dec 09 08:45:15 2016 -->
+
+<table border=1>
+<tr> <th>  </th> <th> term </th> <th> estimate </th> <th> std.error </th> <th> statistic </th> <th> p.value </th>  </tr>
+  <tr> <td align="right"> 1 </td> <td> (Intercept) </td> <td align="right"> -0.17 </td> <td align="right"> 0.10 </td> <td align="right"> -1.67 </td> <td align="right"> 0.10 </td> </tr>
+  <tr> <td align="right"> 2 </td> <td> x </td> <td align="right"> 0.80 </td> <td align="right"> 0.46 </td> <td align="right"> 1.73 </td> <td align="right"> 0.08 </td> </tr>
+  <tr> <td align="right"> 3 </td> <td> x.2 </td> <td align="right"> 0.28 </td> <td align="right"> 0.55 </td> <td align="right"> 0.51 </td> <td align="right"> 0.61 </td> </tr>
+  <tr> <td align="right"> 4 </td> <td> x.3 </td> <td align="right"> 0.19 </td> <td align="right"> 0.18 </td> <td align="right"> 1.04 </td> <td align="right"> 0.30 </td> </tr>
+   </table>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Introduction'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Server Code'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Plot'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Statistical Models Results'>
+         4
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- MathJax: Fall back to local if CDN offline but local image fonts are not supported (saves >100MB) -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        processEscapes: true
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <!-- <script src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script> -->
+  <script>window.MathJax || document.write('<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="libraries/widgets/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>')
+</script>
+<!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
